@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="JoinMapper">
+
+	<select id="joinIDChk"
+			parameterType="java.lang.String"
+			resultType="int">
+		select count(*) from MEMBER where member_id=#{memberId}
+	</select>
+	
+	<insert id="joinIns" parameterType="MemberVO">
+		INSERT INTO MEMBER 
+			(member_id, password, member_name, phone, email, join_date, state, role_name)
+		VALUES 
+			(#{memberId}, #{password}, #{memberName}, #{phone}, #{email}, NOW(), 'Y', 'USER')
+		<selectKey resultType="Integer" keyProperty="memberNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+	</insert>
+	
+	<select id="findID" parameterType="MemberVO" resultType="java.lang.String">
+			select member_id
+			from MEMBER
+			where phone = #{phone}
+			and email = #{email}
+	</select>
+	
+	<select id="findPass" parameterType="MemberVO" resultType="UserVO">
+		SELECT 
+			member_no AS userNo, member_id AS userId, member_name AS userName, role_name AS roleName, email, phone
+		FROM
+			MEMBER
+		WHERE
+			member_id = #{memberId}
+		AND
+			email = #{email}
+	</select>
+	
+	<select id="selectMe" parameterType="UserVO" resultType="MemberVO">
+			select member_no AS memberNo, member_id AS memberId, password, member_name AS memberName, phone, email from MEMBER where member_no=#{userNo}
+	</select>
+	
+	<update id="updateInfo" parameterType="MemberVO">
+		UPDATE MEMBER
+		SET phone = #{phone}, email = #{email}, member_name = #{memberName}
+		WHERE member_no = #{memberNo}
+	</update>
+	
+	<update id="updatePw" parameterType="HashMap">
+		UPDATE MEMBER
+		SET password = #{password}
+		WHERE member_no = #{memberNo}
+	</update>
+
+</mapper>

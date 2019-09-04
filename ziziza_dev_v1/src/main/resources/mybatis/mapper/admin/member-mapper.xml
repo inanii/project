@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminMemberMapper">
+
+	<!-- 회원 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(member_no) AS totalItems
+		FROM
+			MEMBER
+		<where><include refid="searchQuery" /></where>
+	</select>
+	
+	<!-- 회원 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminMemberVO" >
+		SELECT
+			member_no AS memberNo, member_id AS memberId, member_name AS memberName, phone, email, join_date AS joinDate, 
+			last_access_date AS lastAccessDate, state, role_name AS roleName
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, member_no, member_id, member_name, phone, email, join_date, last_access_date, state, role_name
+			FROM 
+				MEMBER AS m
+				,(Select @no:=0) AS no
+			<where><include refid="searchQuery" /></where>
+			ORDER BY member_no DESC
+		) AS MEMBER
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<!-- 회원 정보 -->
+	<select id="selectInfo" parameterType="HashMap" resultType="AdminMemberVO">
+		SELECT 
+			member_id AS memberId, password, member_name AS memberName, phone, email, join_date AS joinDate, 
+			last_access_date AS lastAccessDate, leave_date AS leaveDate, leave_reason AS leaveReason, state, role_name AS roleName
+		FROM 
+			MEMBER
+		WHERE 
+			member_no = #{no}
+	</select>
+	
+	<!-- 회원 정보 입력 -->
+	<insert id="insertInfo" parameterType="AdminMemberVO">
+		INSERT INTO MEMBER 
+			(member_id, password, member_name, phone, email, join_date, state, role_name)
+		VALUES 
+			(#{memberId}, #{password}, #{memberName}, #{phone}, #{email}, NOW(), #{state}, #{roleName})
+		<selectKey resultType="Integer" keyProperty="memberNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+	</insert>
+	
+	<!-- 회원 정보 수정 -->
+	<update id="updateInfo" parameterType="AdminMemberVO">
+		UPDATE MEMBER 
+		SET
+			member_name = #{memberName}, phone = #{phone}, email = #{email}, state = #{state}, role_name = #{roleName}
+			<if test="password != null and password != ''">
+				,password = #{password}
+			</if>
+		WHERE
+			member_no = #{memberNo}
+	</update>
+	
+	<!-- 회원 정보 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			MEMBER
+		WHERE
+			member_no = #{no}
+	</delete>
+	
+	<!-- 중복 체크 -->
+	<select id="checkId" parameterType="HashMap" resultType="Integer">
+		SELECT 
+			COUNT(member_no)
+		FROM 
+			MEMBER
+		WHERE
+			member_id = #{inputId}
+	</select>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		<if test="search.searchType != null and search.searchType != '' and search.searchType != 'NONE'">
+			<choose>
+				<when test="search.searchType == 'ID'">
+					AND member_id like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'NAME'">
+					AND member_name like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+		<if test="search.state != null and search.state != '' and search.state != 'A'">
+			AND state = #{search.state}
+		</if>
+		<if test="search.roleName != null and search.roleName != '' and search.roleName != 'ALL'">
+			AND role_name = #{search.roleName}
+		</if>
+	</sql>
+	
+</mapper>

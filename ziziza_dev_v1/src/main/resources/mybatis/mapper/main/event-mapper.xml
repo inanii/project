@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="EventMapper">
+	<select id="selectTotalCnt" parameterType="HashMap"  resultType="Integer">
+		SELECT 
+			COUNT(board_no)
+		FROM
+			BOARD b			
+		WHERE 
+			board_code = 'EVENT'
+		AND 
+			b.state = 'Y'
+	</select>
+
+	<select id="eventList" parameterType="HashMap" resultType="kr.co.ziziza.main.board.BoardVO">
+		SELECT
+			board_no, title, e_start_date, e_end_date, banner_no, hit
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, board_no, title, e_start_date, e_end_date, banner_no, hit
+			FROM 
+			(
+				SELECT 
+					board_no, title, regist_date, e_start_date, e_end_date, f.file_no AS banner_no, hit
+				FROM
+					BOARD AS b
+				LEFT JOIN FILES AS f
+					ON b.board_no = f.menu_no AND f.file_type = 'BANNER'
+				WHERE board_code = 'EVENT' AND b.state = 'Y'
+				ORDER BY e_start_date DESC, board_no DESC 
+			) AS BOARD
+			, (Select @no:=0) AS no
+		) AS BOARD
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<select id="eventTopList" resultType="kr.co.ziziza.main.board.BoardVO">
+		SELECT 
+			board_no, title, regist_date, e_start_date, e_end_date, f.file_no AS banner_no
+		FROM
+			BOARD AS b
+		LEFT JOIN FILES AS f
+			ON b.board_no = f.menu_no AND f.file_type = 'BANNER'
+		WHERE 
+			board_code = 'EVENT' AND b.state = 'Y'
+		ORDER BY 
+			e_start_date DESC, board_no DESC 
+		LIMIT 4;
+	</select>
+
+	<select id="eventdetail" parameterType="kr.co.ziziza.main.board.BoardVO" resultType="kr.co.ziziza.main.board.BoardVO">
+		SELECT
+			board_no, title, member_no, contents, f.file_no AS banner_no
+		FROM 
+			BOARD AS b
+		LEFT JOIN FILES AS f
+			ON b.board_no = f.menu_no AND f.file_type = 'BANNER'
+		WHERE 
+			board_no = #{board_no} 
+	</select>
+	
+	<update id="updateHit" parameterType="Integer">
+		UPDATE BOARD
+		SET
+			hit = hit + 1
+		WHERE
+			board_no = #{boardNo}
+	</update>
+
+</mapper>

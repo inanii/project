@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminCommentMapper">
+	
+	<!-- 댓글 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(comment_no) AS totalItems
+		FROM
+			COMMENT c
+		INNER JOIN MEMBER m
+			ON c.member_no = m.member_no
+		WHERE
+			board_no = #{no}
+	</select>
+	
+	<!-- 댓글 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminCommentVO" >
+		SELECT 
+			comment_no AS commentNo, contents, regist_date AS registDate, c.state, 
+			c.member_no AS memberNo, m.member_id AS memberId, m.member_name AS memberName
+		FROM
+			COMMENT c
+		INNER JOIN MEMBER m
+			ON c.member_no = m.member_no
+		WHERE
+			board_no = #{no}
+	</select>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			COMMENT
+		WHERE
+			<if test="target == 'comment'">
+				comment_no = #{no}
+			</if>
+			<if test="target == 'board'">
+				board_no = #{no}
+			</if>
+	</delete>
+	
+</mapper>

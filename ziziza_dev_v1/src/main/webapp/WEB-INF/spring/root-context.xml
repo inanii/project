@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						https://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context
+    					http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:property-placeholder location="classpath:properties/config.properties"/>
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<bean id="dataSourceSpied" class="org.apache.tomcat.jdbc.pool.DataSource">
+		<property name="driverClassName" value="${jdbc.mysql.className}" />
+		<property name="url" value="${jdbc.mysql.url}" />
+		<property name="username" value="${jdbc.mysql.username}" />
+		<property name="password" value="${jdbc.mysql.password}" />
+		<property name="initialSize" value="10" />
+		<property name="maxActive" value="100" />
+		<property name="maxIdle" value="30" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="5000" />
+		<property name="validationQuery" value="SELECT 1" />
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.stunstun.spring.repository.entity" />
+		<property name="mapperLocations" value="classpath:mybatis/mapper/**/*.xml" />
+		<property name="configLocation" value="classpath:mybatis/mybatis-context.xml"/>
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- Transaction -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+        <constructor-arg ref="dataSourceSpied" />
+        <property name="logFormatter">
+            <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+                <property name="loggingType" value="MULTI_LINE" />
+                <property name="sqlPrefix" value="SQL         :  "/>
+            </bean>
+        </property>
+    </bean>
+    
+    <!-- 메일보내기 -->
+   <bean id="mailSender" class = "org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="${mail.gmail.host}" />
+      <property name="port" value="${mail.gmail.port}" />
+      <property name="username" value="${mail.gmail.username}" />
+      <property name="password" value="${mail.gmail.password}" />
+      <property name="javaMailProperties">
+         <props>
+               <prop key="mail.transport.protocol">smtp</prop>
+               <prop key="mail.smtp.auth">true</prop>
+               <prop key="mail.smtp.starttls.enable">true</prop>
+               <prop key="mail.debug">true</prop>
+         </props>
+      </property>
+   </bean>
+		
+</beans>

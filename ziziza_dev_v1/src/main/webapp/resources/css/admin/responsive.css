@@ -1,0 +1,46 @@
+@charset "UTF-8";
+/* 320px ~ 640px */
+@media only screen and (min-width : 320px) and (max-width : 640px){
+	#wrap #navWrap{
+		width:100%;
+		-webkit-transition: height 0.3s; /* Safari prior 6.1 */
+  		transition: height 0.3s;
+	}
+	#wrap.hideNav #navWrap{
+		left:0;
+		height:0;
+	}
+	#container .contentWrap{
+		padding-left:0;
+	}
+	.content .lTbl table{
+		min-width: 800px;
+	}
+	.signIn{
+		width:248px;
+	}
+	.form .box p{
+		width:100%;
+	}
+	.bPreveiw img{
+	    width: 100%;
+	}
+	#footer .footer{
+		padding-left:0;
+	}
+	.navToggle .icofont:before{
+		content: "\eac5";
+	}
+}
+
+/* 640px ~ 1400px */
+@media only screen and (min-width : 640px) and (max-width : 1200px) {
+	.content .lTbl table{
+		min-width: 1000px;
+	}
+}
+
+/* 1400px */
+@media only screen and (min-width : 1400px) {
+	
+}

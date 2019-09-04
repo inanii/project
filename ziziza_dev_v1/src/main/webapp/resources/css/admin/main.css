@@ -1,0 +1,780 @@
+@charset "UTF-8";
+@import url("/css/font/nanum/nanumbarungothic.css");
+@import url("/css/font/icofont/icofont.css");
+html{
+	overflow: hidden;
+}
+html, body{
+	height:100%;
+	background-color: #f3f3f3;
+}
+#wrap{
+	position:relative;
+	height:100%;
+	font-family: 'NanumBarunGothic', '나눔바른고딕', '맑은 고딕', 'Malgun Gothic', Dotum;
+    font-size: 14px;
+    font-weight:400;
+	color: #fff;
+}
+
+/* Header */
+#header{
+	z-index : 4;
+	position: fixed;
+	top:0;
+	width: 100%;
+	height: 50px;
+	background: #2C3E50;
+}
+
+.header{
+	position: relative;
+}
+.topBox button{
+	padding:8px 10px;
+}
+
+.topBox .logo{
+	line-height: 50px;
+	text-align: center;
+}
+
+#header .navToggle{
+	position: absolute;
+	top:3px;
+	left:15px;
+	background: #2C3E50;
+}
+
+.navToggle .icofont{
+    font-family: 'IcoFont' !important;
+    font-size: 2em;
+}
+
+.navToggle .icofont:before{
+    content: "\efd4";
+}
+
+.hideNav .navToggle .icofont:before{
+	content: "\efa2";
+}
+
+.topBox .logout{
+	position:absolute;
+	top:8px;
+	right:15px;
+	padding:10px;
+}
+
+/* Navi */
+#wrap.hideNav #navWrap{
+	z-index:-1;
+	left:-180px;
+	width:0;
+	-webkit-transition: left 0.3s, width 0.5s; /* Safari prior 6.1 */
+  	transition: left 0.3s, width 0.5s;
+}
+
+#navWrap{
+	z-index : 3;
+	position:absolute;
+	top:0;
+	left:0;
+	width:180px;
+	height:100%;
+    background: #2c3e50;
+	-webkit-transition: left 0.5s, width 0.3s; /* Safari prior 6.1 */
+  	transition: left 0.5s, width 0.3s;
+  	overflow: hidden;
+}
+
+.navigation{
+	padding-top: 50px;
+	padding-bottom:30px;
+}
+
+.menu{
+	padding-top:0px;
+}
+
+.menu .items{
+	display:block;
+	position:relative;
+	padding:12px 20px;
+	text-decoration: none;
+}
+
+.menu .items .ico{
+	padding:0 3px;	
+}
+
+.menu > li > .items > .icofont{
+    font-family: 'IcoFont' !important;
+    float: right;
+}
+
+.menu > li > .items > .icofont:before{
+	content: "\efc2";
+}
+
+.menu > li.open > .items > .icofont:before{
+    content: "\ef9a";
+}
+
+.menu .subMenu{
+	max-height:0;
+	overflow: hidden;
+	-webkit-transition: max-height 0.3s; /* Safari prior 6.1 */
+  	transition: max-height 0.3s;
+}
+.menu li.open > .items{
+}
+
+.subMenu .items{
+	padding-left: 30px;
+}
+
+.menu li.open .subMenu{
+	max-height: 500px;
+	-webkit-transition: max-height 2s; /* Safari prior 6.1 */
+  	transition: max-height 2s;
+}
+
+.menu li.active .items, .menu .subMenu .items:hover{
+	color:#1ABC9C;
+}
+
+/* Hide Navi */
+#wrap.hideNav .contentWrap, #wrap.hideNav .footer{
+	padding-left:0;
+}
+
+/* Container */
+#container{
+	width: 100%;
+	height: 100%;
+	color: #4a6076;
+}
+
+#container .contentWrap{
+	padding: 50px 0 30px 180px;
+	-webkit-transition: padding-left 0.3s; /* Safari prior 6.1 */
+  	transition: padding-left 0.3s;
+}
+
+#container .contentWrap > .contents{
+	padding:15px 20px;
+}
+
+
+.contentWrap > .contents > .title{
+	padding:10px 0;
+	border-bottom: 1px solid #fff;
+	font-size: 24px;
+}
+
+.contentWrap > .contents > .content{
+	padding:15px 20px;
+	border-top: 4px solid #8CDDCD;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.05);
+	background:#fff;
+}
+
+/* Footer */
+#footer{
+	z-index : 2;
+	position: fixed;
+	bottom:0;
+	width: 100%;
+	height:29px;
+    background: #f0f3f5;
+    border-top: 1px solid #c8ced3;
+}
+
+#footer .footer{
+	padding-left:180px;
+	-webkit-transition: padding-left 0.3s; /* Safari prior 6.1 */
+  	transition: padding-left 0.3s;
+}
+
+/***검색***/
+.search{
+	padding-bottom:10px;
+	margin-bottom:15px;
+	border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.search p{
+	float:left;
+}
+
+.search p + p{
+	float: right	
+}
+
+.search select{
+	margin-right:3px;
+	padding:3px;
+    border: 2px solid #1abc9c;
+	height:30px;
+	border-radius: 2px;
+	vertical-align: middle;
+}
+
+.search input[type='text']{
+	margin-right:3px;
+	padding:5px 10px 6px 10px;
+	width:120px;
+	border: 2px solid #1abc9c;
+	vertical-align: middle;
+}
+
+/***테이블***/
+.lTbl{
+	overflow: auto;
+}
+
+.lTbl > table{
+	width:100%;
+	text-align: center;
+}
+
+.lTbl td, .lTbl th{
+	padding:8px 15px;
+	border: 1px solid #ddd;
+	background-color: #fff;
+}
+
+.lTbl th{font-weight: 700;font-size:15px;}
+
+.lTbl td.title{
+	text-align: left;
+	text-decoration: underline;
+}
+
+/******/
+.lOpt{
+	position: relative;
+	padding:15px 0;
+	overflow: hidden;
+}
+.lOpt .paging{
+	margin: auto;
+	width:260px;
+	clear: right;
+}
+
+.paging li{
+	display: inline-block;
+}
+
+.paging li > a, .paging li > span{
+	display: block;
+	padding:6px 10px;
+	border: 1px solid #ddd;
+	border-left:none;
+	text-decoration: none;
+}
+
+.paging li.active > a,
+.paging li.active > span{
+	background: #1abc9c;
+	color:#fff;
+	border-color: #1abc9c;
+}
+
+.paging li:not(.active):not(.disabled) > a, 
+.paging li:not(.active):not(.disabled) > span{
+	cursor: pointer;
+}
+
+.paging li:not(.active):not(.disabled):hover > a, 
+.paging li:not(.active):not(.disabled):hover > span{
+	color: #014c8c;
+    background-color: #eceeef;
+    border-color: #ddd;
+}
+
+.paging li:first-child > a, .paging li:first-child > span{
+	border-left: 1px solid #ddd;
+	border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.paging li:last-child > a, .paging li:last-child > span{
+	border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.paging li.disabled{
+	color:#ddd
+}
+
+.lOpt .btnBox{
+	padding:9px 0;
+}
+
+/******* FORM *******/
+.form{
+	max-width: 600px;
+}
+
+.form label{
+	display:inline-block;
+	width:70px;
+	padding:8px 0;
+	vertical-align: top;
+}
+
+.form select{
+	padding:3px;
+    border: 2px solid #ddd;
+	height:30px;
+	border-radius: 2px;
+	vertical-align: middle;
+}
+
+.form  input[type='text'], .form input[type='date'], .form input[type='password'], .form input[type='tel'], .form input[type='email'], .form input[type='time']{
+	padding:5px 10px 6px 10px;
+	border: 2px solid #ddd;
+	width:150px;
+	vertical-align: middle;
+}
+
+.form input:focus, .form select:focus{
+	border-color:#1abc9c;
+}
+
+.form input[type='text'], .form select{
+	vertical-align: middle;
+}
+
+.form input[name='title'], .form input[name='qstTitle']{
+	width:240px;
+}
+
+.form textarea[name='contents'], .form textarea[name='qstContents'], .form textarea[name='answer']{
+	width: 240px;
+	padding:5px 10px;
+}
+
+.form .box > div, .form .files > div, .form .native > div{
+	padding: 10px 0;
+}
+
+.form .box > .block{
+	float:left;
+	width: 50%;
+}
+
+.form .box .message{
+	display: block;
+	padding: 5px 0;
+	padding-left:70px;
+	height:12px;
+	font-size: 12px;
+	color:green;
+}
+
+.form .box .message.error{
+	color:red;
+}
+
+.form .box .message.error:before{
+	content: "\eed8";
+	display: inline-block;
+	font-family: IcoFont!important;
+}
+
+.form .fOpt{
+	padding:10px 0 ;
+	text-align: right
+}
+
+.fOpt .dBtn{
+	margin-right:3px;
+}
+
+.fOpt button{
+	margin-left:3px;
+}
+
+.chargeList, .plantList{
+	padding:5px 0;
+}
+
+.chargeList li{
+	padding:5px 0;
+	border-bottom: 1px solid #ddd;
+}
+
+.chargeList li:first-child{
+	border-top: 1px solid #ddd;
+}
+
+.chargeList li span{
+	display: inline-block;
+	width:100px;
+	padding:5px 10px;
+	font-size:14px;
+	border-left: 1px solid #ddd;
+}
+
+.chargeList li span:first-child{
+	border:none;
+}
+
+.plantList li{
+	display: inline-block;
+	margin:0 5px;
+	padding:8px 10px;
+	border-radius: 3px;
+	background: #eee;
+	color:#292b2c;
+}
+
+/*****	File	******/
+.bPreview{
+	display:inline-block;
+	position:relative;
+}
+
+.bPreview img{
+	border:5px solid #ccc;
+   	width: 320px;
+    height: 240px;
+    border-radius: 4px;
+}
+.bPreview .danger{
+	position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.fileList li{
+	position:relative;
+	padding:10px;
+	background: #f7f7f7;
+}
+
+.fileList li > i{
+	position: absolute;
+    top: 8px;
+    left: 5px;
+    display: block;
+}
+
+.fileList li > .danger{
+	position: absolute;
+    top: 9px;
+    right: 5px;
+}
+
+.fileList li > .data{
+	position: absolute;
+    top: 9px;
+    right: 45px;
+}
+
+.fileList li > p{
+	display: inline-block;
+	padding:5px 30px;
+	vertical-align: middle;
+}
+
+.fileList input[type='file']{
+	display: none;
+}
+
+#slider {
+    margin: 10px 0;
+	width: 320px;
+}
+.slider .slick-track > div{
+	border: 3px solid #ddd;
+}
+
+.sliderNav{
+	width: 320px;
+}
+
+.slider img{
+	width: 314px;
+	height: 240px;
+}
+
+.sliderNav p{
+	width:110px;
+	height:82px;
+}
+
+.sliderNav .slick-current img{
+	border-color:#1abc9c;
+}
+
+.sliderNav img{
+	border:1px solid #ddd;
+	width:100px;
+	height:80px;
+}
+
+/*****	댓글	****/
+.reply{
+	max-width: 600px;
+}
+
+.reply > div{
+	position:relative;
+	padding:8px 15px;
+	border-bottom: 2px solid #ddd;
+}
+
+.reply > div > .title{
+	font-size:15px;
+	font-weight: 700;
+}
+
+.reply > div .cnt{
+	margin: 0 5px;
+    padding: 3px 7px;
+	border-radius: 10px;
+	font-weight: 400;
+	background-color: #1abc9c;
+	color: #fff;
+}
+
+.reply > div > button{
+	position: absolute;
+	top:3px;
+	right:0;
+}
+
+.replyList li{
+	position: relative;
+	border-bottom: 2px solid #ddd;
+}
+
+.replyList li.empty{
+	padding:10px 0;
+	text-align: center;
+}
+
+.replyList p{
+	padding:5px 0;
+}
+
+.replyList li > .danger{
+	position: absolute;
+	right:0;
+	top:12px;
+}
+
+.replyList li .date{
+	padding:0 5px;
+	font-size: 11px;
+}
+
+.replyList li .writer{
+	font-size: 15px;
+	font-weight: 700;
+}
+
+/******** LOGIN*********/
+.signBox{
+	margin: 0 auto;
+	padding:10px;
+	width:300px;
+	background-color: #fff;
+	border-radius: 8px;
+}
+
+.signHeader{
+	padding-bottom:10px;
+    border-bottom: 1px solid #bdc3c7;
+	color: #1abc9c;
+	text-align: center;
+}
+.signIn, .login{
+	padding:15px;
+}
+
+.signIn label{
+	display: inline-block;
+    vertical-align: bottom;
+}
+
+.signIn .box input[type='text'], .signIn .box input[type='password']{
+	margin-left:10px;
+	padding:5px 10px;
+	width:200px;
+	border: 2px solid rgba(0,0,0,.15);
+	background-color: #fff;
+}
+.signIn .box input[type='text']:focus, .signIn .box input[type='password']:focus{
+	border-color: #13866f;
+}
+
+.signIn .box .message{
+	display: block;
+	padding: 8px 0;
+	padding-left:42px;
+	height: 24px;
+	font-size: 12px;
+	color:#1ABC9C;
+}
+
+.signIn .box .message.error{
+	color:#e74c3c;
+}
+
+.signIn .box .message.error:before{
+	content: "\eed8";
+	display: inline-block;
+	font-family: IcoFont!important;
+}
+
+.signIn .rBtn{
+	width:100%;
+}
+.login p{
+	padding:5px 0;
+	text-align: center;
+}
+.login .message{
+	padding:25px 0;
+	font-size:15px;
+}
+
+.login .message span{
+	font-weight: 700;
+}
+
+.login .mBtn{
+	margin-right:10px;
+}
+.login .logout, .login .mBtn{
+	width:80px;
+}
+
+/*******Modal***********/
+.modal > p{
+	padding:10px 0;
+}
+.modal .message{
+	font-size: 15px;
+	font-weight:700;
+	text-align: center;
+}
+
+.modal.alert .close{
+	width:100%;
+}
+
+.modal .mOpt{
+	text-align: center;	
+}
+
+.modal.confirm .close, .modal.confirm .ok{
+	width:40%;
+	margin:0 2%;
+}
+
+.fr{
+	float: right;
+}
+
+.fl{
+	float: left;
+}
+
+.ar{
+	position: absolute;
+	right:0;
+	top:0;
+}
+
+.al{
+	position: absolute;
+	left:0;
+	top:0;
+}
+
+.fc{
+	clear: both;
+}
+
+/*** PACE ****/
+.pace {
+  -webkit-pointer-events: none;
+  pointer-events: none;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.pace-inactive {
+  display: none;
+}
+
+.pace .pace-progress {
+  background: #29d;
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  right: 100%;
+  width: 100%;
+  height: 2px;
+}
+
+/**		버튼Button		**/
+.btn{
+	display: inline-block;
+	padding: 10px 20px;
+	border-radius: 2px;
+    border-color: #1abc9c;
+	background-color: #1abc9c;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.btn.md{
+	padding:8px 15px;
+}
+
+.btn.sm{
+	padding:6px 10px;
+	font-size: 13px;
+}
+
+.btn.link{
+	background-color: #34495e;
+    border-color: #34495e;
+}
+
+.btn.waring{
+	background-color: #eb9316;
+    border-color: #eb9316;
+}
+
+.btn.danger{
+	background-color: #e74c3c;;
+    border-color: #e74c3c;;
+}
+
+.btn.data{
+	background-color: #3498DB;
+    border-color: #3498DB;
+}
+
+.btn.default{
+	background-color: #bdc3c7;
+    border-color: #bdc3c7;
+}
+
+.btn.check{
+	background-color: #449d44;
+    border-color: #449d44;
+}

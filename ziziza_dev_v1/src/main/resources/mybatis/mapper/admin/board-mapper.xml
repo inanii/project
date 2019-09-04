@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminBoardMapper">
+
+	<!-- 게시물 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(board_no) AS totalItems
+		FROM
+			BOARD AS b
+		INNER JOIN MEMBER AS m
+			ON b.member_no = m.member_no
+		LEFT JOIN MEMBER AS modi
+			ON b.modify_no = modi.member_no 
+		<where><include refid="searchQuery" /></where>
+	</select>
+	
+	<!-- 게시물 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminBoardVO" >
+		SELECT
+			board_no AS boardNo, title, e_start_date AS eStartDate, e_end_date AS eEndDate, regist_date AS registDate, modify_date AS modifyDate, state,
+			member_no AS memberNo, member_name AS memberName, modify_no AS modifyNo, modify_name AS modifyName
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, board_no, title, e_start_date, e_end_date, regist_date, modify_date, state, member_no, member_name, modify_no, modify_name
+			FROM 
+			(
+				SELECT 
+					board_no, title, e_start_date , e_end_date, regist_date, modify_date, b.state, b.member_no, m.member_name, b.modify_no, modi.member_name AS modify_name
+				FROM
+					BOARD AS b
+				INNER JOIN MEMBER AS m
+					ON b.member_no = m.member_no
+				LEFT JOIN MEMBER AS modi
+					ON b.modify_no = modi.member_no 
+				<where><include refid="searchQuery" /></where>
+				ORDER BY board_no DESC
+			) AS BOARD
+			, (Select @no:=0) AS no
+		) AS BOARD
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<!-- 게시물 정보 -->
+	<select id="selectInfo" parameterType="HashMap" resultType="AdminBoardVO">
+		SELECT 
+			board_no AS boardNo, board_code AS boardCode, title, contents, b.state AS state, 
+			e_start_date AS eStartDate, e_end_date AS eEndDate,
+			b.member_no AS memberNo, m.member_name AS memberName,
+			b.modify_no AS modifyNo, modi.member_name AS modifyName
+		FROM 
+			BOARD AS b 
+		INNER JOIN MEMBER AS m
+			ON b.member_no = m.member_no
+		LEFT JOIN MEMBER AS modi
+			ON b.modify_no = modi.member_no 
+		WHERE 
+			board_no = #{no}
+	</select>
+	
+	<!-- 게시물 정보 입력 -->
+	<insert id="insertInfo" parameterType="AdminBoardVO">
+		INSERT INTO BOARD 
+			(
+				board_code, title, contents, regist_date, modify_date, state, member_no, modify_no
+				<if test="eStartDate != null">, e_start_date</if>
+				<if test="eEndDate != null">, e_end_date</if>
+			)
+		VALUES 
+			(
+				#{boardCode}, #{title}, #{contents}, NOW(), NOW(), #{state}, #{memberNo}, #{memberNo}
+				<if test="eStartDate != null">, #{eStartDate}</if>
+				<if test="eEndDate != null">, #{eEndDate}</if>
+			)
+		<selectKey resultType="Integer" keyProperty="boardNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+	</insert>
+	
+	<!-- 게시물 정보 수정 -->
+	<update id="updateInfo" parameterType="AdminMemberVO">
+		UPDATE BOARD 
+		SET
+			title = #{title},  contents = #{contents}, state = #{state}, modify_date = NOW(), modify_no = #{modifyNo}
+			<if test="eStartDate != null">, e_start_date = #{eStartDate}</if>
+			<if test="eEndDate != null">, e_end_date = #{eEndDate}</if>
+		WHERE
+			board_no = #{boardNo}
+	</update>
+	
+	<!-- 게시물 정보 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			BOARD
+		WHERE
+			board_no = #{no}
+	</delete>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		AND board_code = #{boardCode}
+		<if test="search.searchType != null and search.searchType != '' and search.searchType != 'NONE'">
+			<choose>
+				<when test="search.searchType == 'TITLE'">
+					AND title like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'CNT'">
+					AND contents like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+		<if test="search.state != null and search.state != '' and search.state != 'A'">
+			AND b.state = #{search.state}
+		</if>
+	</sql>
+	
+</mapper>

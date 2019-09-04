@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="FileMapper">
+	
+	<select id="selectList" parameterType="HashMap" resultType="FileVO">
+		SELECT 
+			file_no AS fileNo, menu_type AS menuType, menu_no AS menuNo, file_type AS fileType,
+			origin_name AS originName, save_name AS saveName, save_path AS savePath, thum_name AS thumeName, thum_path AS thumPath, 
+			file_storage AS fileStorage, file_content_type AS fileContentType
+		FROM
+			FILES
+		WHERE
+			menu_type = #{menuType} AND menu_no = #{menuNo}
+	</select>
+	
+	<select id="selectInfo" parameterType="HashMap" resultType="FileVO">
+		SELECT
+			file_no AS fileNo, menu_type AS menuType, menu_no AS menuNo, file_type AS fileType,
+			origin_name AS originName, save_name AS saveName, save_path AS savePath, thum_name AS thumeName, thum_path AS thumPath, 
+			file_storage AS fileStorage, file_content_type AS fileContentType
+		FROM
+			FILES
+		WHERE
+			file_no = #{no}
+	</select>
+	
+	<!-- 파일 목록 저장 -->
+	<insert id="insertList" parameterType="FileVO">
+		INSERT INTO FILES 
+			(menu_type, menu_no, file_type, origin_name, save_name, save_path, thum_name, thum_path, file_storage, file_content_type)
+		VALUES 
+		<foreach collection="list" item="vo" separator=",">
+			(#{vo.menuType}, #{vo.menuNo}, #{vo.fileType}, #{vo.originName}, #{vo.saveName}, #{vo.savePath}, #{vo.thumName}, #{vo.thumPath}, #{vo.fileStorage}, #{vo.fileContentType})
+		</foreach>
+	</insert>
+	
+	<!-- 파일 저장 -->
+	<insert id="insertInfo" parameterType="FileVO">
+		INSERT INTO FILES 
+			(menu_type, menu_no, file_type, origin_name, save_name, save_path, thum_name, thum_path, file_storage, file_content_type)
+		VALUES 
+			(#{menuType}, #{menuNo}, #{fileType}, #{originName}, #{saveName}, #{savePath}, #{thumName}, #{thumPath}, #{fileStorage}, #{fileContentType})
+		<selectKey resultType="Integer" keyProperty="fileNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+	</insert>
+	
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			FILES
+		WHERE
+			<if test="target == 'file'">
+				file_no = #{no}
+			</if>
+			<if test="target == 'board'">
+				menu_type = #{menuType} AND menu_no = #{no}
+			</if>
+	</delete>
+	
+</mapper>

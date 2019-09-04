@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="LoginMapper">
+	
+	<select id="loginUser" parameterType="UserVO" resultType="UserVO">
+		SELECT 
+			m.member_no AS userNo, member_id AS userId, password AS userPw, member_name AS userName, role_name AS roleName, mng.mng_no AS mngNo
+		FROM
+			MEMBER m
+		LEFT JOIN MANAGER mng
+			ON	m.member_no = mng.member_no
+		WHERE
+			member_id = #{userId} 
+		AND m.state = 'Y'
+	</select>
+	
+	<select id="selectUser" parameterType="HashMap" resultType="UserVO">
+		SELECT 
+			member_no AS userNo, member_id AS userId, member_name AS userName, role_name AS roleName, email, phone
+		FROM
+			MEMBER
+		WHERE
+			member_no = #{no} 
+	</select>
+	
+	<update id="updateAccessDate" parameterType="Integer">
+		UPDATE 
+			MEMBER 
+		SET 
+			last_access_date = NOW()
+		WHERE
+			member_no = #{userNo}
+	</update>
+	
+	<update id="updatePassword" parameterType="UserVO">
+		UPDATE 
+			MEMBER 
+		SET 
+			password = #{userPw}
+		WHERE
+			member_no = #{userNo}
+	</update>
+
+</mapper>

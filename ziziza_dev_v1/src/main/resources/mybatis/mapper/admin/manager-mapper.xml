@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminManagerMapper">
+
+	<!-- 사업자 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(mng_no) AS totalItems
+		FROM
+			MANAGER AS mng
+		INNER JOIN MEMBER AS m
+			ON mng.member_no = m.member_no
+		LEFT JOIN MEMBER AS a
+			ON mng.apply_no = a.member_no
+		<where><include refid="searchQuery" /></where>
+	</select>
+	
+	<!-- 사업자 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminManagerVO" >
+		SELECT
+			mng_no AS mngNo, mng_name AS mngName, biz_no AS bizNo, rep_tel AS repTel, apply_date AS applyDate, 
+			state, member_no AS memberNo, member_id AS memberId, apply_no AS applyNo, apply_name AS applyName
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, mng_no, mng_name, biz_no, rep_tel, apply_date, state, member_no, member_id, apply_no, apply_name
+			FROM
+			(
+				SELECT mng_no, mng_name, biz_no, rep_tel, apply_date, mng.state, mng.member_no, m.member_id, apply_no, a.member_name AS apply_name
+				FROM
+					MANAGER AS mng
+				INNER JOIN MEMBER AS m
+					ON mng.member_no = m.member_no
+				LEFT JOIN MEMBER AS a
+					ON mng.apply_no = a.member_no 
+				<where><include refid="searchQuery" /></where>
+				ORDER BY mng_no DESC
+			) AS MANAGER
+			, (Select @no:=0) AS no
+		) AS MANAGER
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<!-- 사업자 정보 -->
+	<select id="selectInfo" parameterType="HashMap" resultType="AdminManagerVO">
+		SELECT 
+			mng_no AS mngNo, mng_name AS mngName, biz_no AS bizNo, rep_tel AS repTel, apply_date AS applyDate,
+			mng.state, mng.member_no AS memberNo, m.member_id AS memberId, apply_no AS applyNo, a.member_name AS applyName
+		FROM 
+			MANAGER AS mng 
+		INNER JOIN MEMBER AS m
+			ON mng.member_no = m.member_no
+		LEFT JOIN MEMBER AS a
+			ON mng.apply_no = a.member_no 
+		WHERE 
+			mng_no = #{no}
+	</select>
+	
+	<!-- 사업자 정보 수정 -->
+	<update id="updateInfo" parameterType="AdminManagerVO">
+		UPDATE MANAGER 
+		SET
+			mng_name = #{mngName}, biz_no = #{bizNo},  rep_tel = #{repTel}, 
+			state = #{state}
+			<choose>
+				<when test="state == 'Y'">
+					, apply_date = NOW()
+					, apply_no	=	#{applyNo}
+				</when>
+				<when test="state == 'N'">
+					, apply_date = null
+				</when>
+			</choose>
+		WHERE
+			mng_no = #{mngNo}
+	</update>
+	
+	<!-- 사업자 정보 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			MANAGER
+		WHERE
+			mng_no = #{no}
+	</delete>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		<if test="search.searchType != null and search.searchType != '' and search.searchType != 'NONE'">
+			<choose>
+				<when test="search.searchType == 'NAME'">
+					AND mng_name like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'REGNUM'">
+					AND biz_no like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+		<if test="search.state != null and search.state != '' and search.state != 'A'">
+			AND mng.state = #{search.state}
+		</if>
+	</sql>
+	
+</mapper>

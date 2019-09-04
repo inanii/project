@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="JoinMngMapper">
+	<!-- 회원가입-->
+	
+	<select id="joinIdCheck" parameterType="kr.co.ziziza.manager.join.MngMemberJoinVO" resultType="int">
+		SELECT
+			count(*) 
+		FROM 
+			MEMBER
+		WHERE
+			member_id = #{memberId}
+	</select>
+	
+	<insert id="joinMember" parameterType="kr.co.ziziza.manager.join.MngMemberJoinVO">
+		INSERT INTO MEMBER
+			(member_id, password, member_name, phone, email, join_date, state, role_name)
+		VALUES 
+			(#{memberId}, #{password}, #{memberName}, #{phone}, #{email}, now(), 'Y', 'MANAGER')
+		<selectKey resultType="Integer" keyProperty="memberNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>	
+	</insert>
+	
+	<insert id="joinManager" parameterType="kr.co.ziziza.manager.join.MngManagerJoinVO">
+		INSERT INTO MANAGER 
+			(mng_name, biz_no, rep_tel, state, member_no)
+		VALUES 
+			(#{mngName}, #{bizNo}, #{repTel}, 'N', #{memberNo})
+		<selectKey resultType="Integer" keyProperty="mngNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+	</insert>
+</mapper>

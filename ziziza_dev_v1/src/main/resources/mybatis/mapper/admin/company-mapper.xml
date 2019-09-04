@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminCompanyMapper">
+
+	<!-- 사업장 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(company_no) AS totalItems
+		FROM
+			COMPANY AS c
+		INNER JOIN MANAGER AS mng
+			ON c.mng_no = mng.mng_no 
+		<where><include refid="searchQuery" /></where>
+	</select>
+	
+	<!-- 사업장 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminCompanyVO" >
+		SELECT
+			company_no AS companyNo, company_kind AS companyKind, company_name AS companyName, 
+			zone_code AS zoneCode, address, detail_address AS detailAddress,
+			company_tel AS companyTel, contents, open_time AS openTime, close_time AS closeTime,
+			regist_date AS registDate, state, mng_no AS mngNo, mng_name AS mngName
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, company_no, company_kind, company_name, 
+				zone_code, address, detail_address,
+				company_tel, contents, open_time, close_time,
+				regist_date, state, mng_no, mng_name
+			FROM
+			(
+				SELECT
+					company_no, company_kind, company_name, zone_code, address, detail_address, company_tel, contents, open_time, close_time,
+					regist_date, c.state, c.mng_no, mng.mng_name
+				FROM
+					COMPANY AS c
+				INNER JOIN MANAGER AS mng
+					ON c.mng_no = mng.mng_no 
+				<where><include refid="searchQuery" /></where>
+				ORDER BY company_no DESC
+			) AS COMPANY
+			, (Select @no:=0) AS no
+		) AS COMPANY
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<!-- 사업장 정보 -->
+	<select id="selectInfo" parameterType="HashMap" resultType="AdminCompanyVO">
+		SELECT
+			company_no AS companyNo, company_kind AS companyKind, company_name AS companyName, 
+			zone_code AS zoneCode, address, detail_address AS detailAddress, 
+			company_tel AS companyTel, contents, open_time AS openTime, close_time AS closeTime,
+			regist_date AS registDate, c.state, c.mng_no AS mngNo, mng.mng_name AS mngName
+		FROM
+			COMPANY AS c
+		INNER JOIN MANAGER AS mng
+			ON c.mng_no = mng.mng_no 
+		WHERE 
+			company_no = #{no}
+	</select>
+	
+	<!-- 사업자 정보 수정 -->
+	<update id="updateInfo" parameterType="AdminCompanyVO">
+		UPDATE COMPANY 
+		SET
+			company_kind = #{companyKind}, company_name = #{companyName}, company_tel = #{companyTel},
+			zone_code = #{zoneCode}, address = #{address}, detail_address = #{detailAddress},
+			contents = #{contents}, open_time = #{openTime}, close_time = #{closeTime}, state = #{state}
+		WHERE
+			company_no = #{companyNo}
+	</update>
+	
+	<!-- 사업자 정보 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			COMPANY
+		WHERE
+			company_no = #{no}
+	</delete>
+	
+	<select id="selectChargeList" parameterType="Integer" resultType="AdminChargeVO" >
+		SELECT
+			charge_no AS chargeNo, time_kind AS timeKind, subject, price
+		FROM
+			CHARGE
+		WHERE
+			company_no = #{companyNo}
+		ORDER BY
+			order_seq
+	</select>
+	
+	<select id="selectPlantsList" parameterType="Integer" resultType="AdminPlantsVO" >
+		SELECT
+			plant_no AS plantNo, plant_name AS plantName
+		FROM
+			PLANTS
+		WHERE
+			company_no = #{companyNo}
+	</select>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		<if test="search.searchType != null and search.searchType != '' and search.searchType != 'NONE'">
+			<choose>
+				<when test="search.searchType == 'NAME'">
+					AND company_name like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'ADDR'">
+					AND address like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+		<if test="search.state != null and search.state != '' and search.state != 'A'">
+			AND c.state = #{search.state}
+		</if>
+	</sql>
+	
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="CompanyMapper">
+<select id="companylist" resultType="kr.co.ziziza.manager.company.MngRegistVO">
+			SELECT 
+				company_no AS companyNo, company_kind AS companyKind, company_name AS companyName, address, company_tel As companyTel
+				, contents, open_time AS openTime, close_time AS closeTime, regist_date AS registDate, state
+			FROM
+				COMPANY
+</select>
+
+	<select id="companyGetList" parameterType="HashMap"
+			resultType="kr.co.ziziza.manager.company.MngRegistVO">
+			SELECT 
+				company_no AS companyNo, company_name AS companyName, zone_code AS zoneCode, address, detail_address AS detailAddress, 
+				open_time AS openTime, close_time AS closeTime, file_no AS bannerNo
+			FROM
+				COMPANY c
+			LEFT JOIN FILES f
+			 	ON company_no = menu_no AND menu_type = 'COMPANY' AND file_type = 'BANNER'
+			WHERE
+			state = 'Y' 
+			<if test="(sido != null and sido != '') or (gugun != null and gugun != '')">
+			AND address LIKE CONCAT(#{sido},'_',#{gugun},'%')
+			</if>
+			<if test="searchTxt != null and searchTxt != ''">
+			AND company_name LIKE concat('%',#{searchTxt},'%')
+			</if>
+			ORDER BY company_no DESC
+			<if test="type != null and type == 'main'">
+			LIMIT 8
+			</if>
+	</select>
+
+<select id="companydetail" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="kr.co.ziziza.manager.company.MngRegistVO">
+	SELECT 
+			company_no AS companyNo, company_kind AS companyKind, company_name AS companyName, 
+			zone_code AS zoneCode, address, detail_address AS detailAddress, company_tel As companyTel
+				, contents, open_time AS openTime, close_time AS closeTime, regist_date AS registDate
+			FROM
+				COMPANY c
+		WHERE company_no = #{companyNo}
+</select>
+
+<select id="plantList" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="kr.co.ziziza.manager.company.MngPlantsVO">
+	SELECT 
+			plant_name AS plantName
+			FROM
+				PLANTS
+		WHERE company_no = #{companyNo}
+</select>
+
+<select id="chargeList" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="kr.co.ziziza.manager.company.MngChargeVO">
+	SELECT 
+		time_kind AS timeKind, subject, price
+		FROM
+			CHARGE
+	WHERE 
+		company_no = ${companyNo}
+	ORDER BY
+		order_seq
+</select>
+
+<select id="proList" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="MngPromotionVO">
+	SELECT 
+		event_content AS eventContent
+	FROM
+		COMPANY_EVENT
+	WHERE 
+		company_no = ${companyNo}
+</select>
+
+<select id="companyreplylist" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="kr.co.ziziza.main.company.ReviewVO">
+	SELECT r.review_no, r.contents, r.score, r.regist_date
+	, r.company_no, m.member_no, m.member_name 
+	FROM REVIEW r, MEMBER m
+	where company_no = #{companyNo}
+		and r.member_no = m.member_no
+			ORDER BY r.review_no
+</select>
+
+<insert id="companyinsertReply" parameterType="kr.co.ziziza.main.company.ReviewVO">
+	INSERT INTO REVIEW 
+		(company_no, contents, regist_date, member_no, score, state)
+	VALUES
+		(#{company_no}, #{contents}, NOW(), #{member_no}, #{score}, 'Y')
+	<selectKey resultType="Integer" keyProperty="review_no" order="AFTER">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+</insert>
+
+<select id="companyReplyDetail" parameterType="kr.co.ziziza.main.company.ReviewVO" resultType="kr.co.ziziza.main.company.ReviewVO">
+	SELECT r.review_no, r.contents, r.score, r.regist_date, r.state
+	, r.company_no, m.member_no, m.member_name 
+		FROM REVIEW r, MEMBER m
+	where r.review_no = #{review_no}
+	and r.member_no = m.member_no
+</select>
+
+<delete id="companyReplyDelete" parameterType="kr.co.ziziza.main.company.ReviewVO">
+	delete from REVIEW where review_no = #{review_no}
+</delete>
+
+
+</mapper>

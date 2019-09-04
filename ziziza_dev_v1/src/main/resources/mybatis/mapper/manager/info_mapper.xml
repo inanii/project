@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="InfoMngMapper">
+	<!-- 인포 리스트 -->
+
+	<select id="selectInfoMember" parameterType="kr.co.ziziza.manager.info.MngMemberInfoVO" resultType="kr.co.ziziza.manager.info.MngMemberInfoVO" >
+		SELECT 
+			member_id AS memberId, member_name AS memberName, phone, email
+		FROM 
+			MEMBER
+		WHERE 
+			member_no = ${memberNo}
+	</select>
+	
+	<select id="selectInfoManager" parameterType="kr.co.ziziza.manager.info.MngManagerInfoVO" resultType="kr.co.ziziza.manager.info.MngManagerInfoVO" >
+		SELECT 
+			mng_no AS mngNo, biz_no AS bizNo, mng_name AS mngName, rep_tel AS repTel, state
+		FROM 
+			MANAGER
+		WHERE 
+			member_no = ${memberNo}
+	</select>
+	
+	<update id="memberUpdate" parameterType="kr.co.ziziza.manager.info.MngMemberInfoVO">
+		UPDATE MEMBER
+		SET
+			member_id = #{memberId}, member_name = #{memberName}, phone = #{phone}, email = #{email}
+		WHERE
+			member_no = ${memberNo}
+	</update>
+	
+	<update id="managerUpdate" parameterType="kr.co.ziziza.manager.info.MngManagerInfoVO">
+		UPDATE MANAGER
+		SET
+			biz_no = #{bizNo}, mng_name = #{mngName}, rep_tel = #{repTel}
+		WHERE
+			member_no = ${memberNo}
+	</update>
+</mapper>

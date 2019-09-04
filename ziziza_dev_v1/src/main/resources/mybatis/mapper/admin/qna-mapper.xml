@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminQnAMapper">
+
+	<!-- 문의 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(qna_no) AS totalItems
+		FROM
+			QNA AS q
+		INNER JOIN MEMBER AS m
+			ON q.member_no = m.member_no
+		LEFT JOIN MEMBER AS a
+			ON q.answer_no = a.member_no
+		<where><include refid="searchQuery"/></where>
+	</select>
+	
+	<!-- 문의 목록 -->
+	<select id="selectList" parameterType="HashMap" resultType="AdminQnAVO" >
+		SELECT
+			qna_no AS qnaNo, qst_title AS qstTitle, qst_contents AS qstContents, regist_date AS registDate,
+			state, answer_no AS answerNo, answer_name AS answerName, answer_date AS answerDate, member_no AS memberNo, 
+			member_name AS memberName, role_name AS roleName
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, qna_no, qst_title, qst_contents, regist_date, 
+			  	state, answer_date, answer_no, answer_name, member_no, member_name, role_name
+			FROM 
+			(
+				SELECT
+					qna_no, qst_title, qst_contents, regist_date, q.state, answer_date, 
+					q.answer_no, a.member_name AS answer_name, q.member_no, m.member_name, m.role_name
+				FROM
+					QNA AS q
+				INNER JOIN MEMBER AS m
+					ON q.member_no = m.member_no
+				LEFT JOIN MEMBER AS a
+					ON q.answer_no = a.member_no
+				<where><include refid="searchQuery"/></where>
+				ORDER BY qna_no DESC
+			) QNA, (Select @no:=0) AS no
+		) AS QNA
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<!-- 문의 정보 -->
+	<select id="selectInfo" parameterType="HashMap" resultType="AdminQnAVO">
+		SELECT 
+			qst_title AS qstTitle, qst_contents AS qstContents, alram_type AS alramType, regist_date AS registDate, 
+		 	q.state, answer, answer_date AS answerDate, q.answer_no AS answerNo, a.member_name AS answerName,
+		 	q.member_no AS memberNo, m.member_name AS memberName, m.role_name AS roleName,
+		 	m.email AS alramEmail, m.phone AS alramPhone
+		FROM 
+			QNA AS q
+		INNER JOIN MEMBER AS m
+			ON q.member_no = m.member_no
+		LEFT JOIN MEMBER AS a
+			ON q.answer_no = a.member_no
+		WHERE 
+			qna_no = #{no}
+	</select>
+	
+	<!-- 답변 수정 -->
+	<update id="updateInfo" parameterType="AdminQnAVO">
+		UPDATE QNA 
+		SET
+			answer_no = #{answerNo}, answer = #{answer}, answer_date = NOW(), state = #{state}
+		WHERE
+			qna_no = #{qnaNo}
+	</update>
+	
+	<!-- 문의 삭제 -->
+	<delete id="deleteInfo" parameterType="HashMap">
+		DELETE FROM 
+			QNA
+		WHERE
+			qna_no = #{no}
+	</delete>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		<if test="search.searchType != null and search.searchType != '' and search.searchType != 'NONE'">
+			<choose>
+				<when test="search.searchType == 'title'">
+					AND qst_title like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'cnt'">
+					AND qst_contents like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+		<if test="search.state != null and search.state != '' and search.state != 'A'">
+			AND q.state = #{search.state}
+		</if>
+		<if test="search.roleName != null and search.roleName != '' and search.roleName != 'ALL'">
+			AND m.role_name = #{search.roleName}
+		</if>
+	</sql>
+	
+</mapper>

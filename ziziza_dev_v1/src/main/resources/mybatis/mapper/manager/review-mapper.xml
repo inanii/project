@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="QnaReviewMapper">
+	<!-- 게시물 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(review_no) AS totalItems
+		FROM
+			REVIEW AS r
+		WHERE
+			company_no = ${vo.company_no}
+	</select>
+
+	<!-- 사업장 리스트 -->
+	<select id="selectReviewList" parameterType="HashMap" resultType="kr.co.ziziza.main.company.ReviewVO" >
+		SELECT
+			review_no, contents, regist_date, member_id, score
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, review_no, contents, regist_date, member_id, score
+			FROM 
+			(
+				SELECT 
+					r.review_no, r.contents, r.regist_date, m.member_id, r.score
+				FROM
+					REVIEW AS r, MEMBER AS m
+				WHERE
+					company_no = ${vo.company_no}
+					AND r.member_no = m.member_no
+				ORDER BY review_no DESC
+			) AS REVIEW
+			, (Select @no:=0) AS no
+		) AS REVIEW
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="MainMapper">
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT 
+			COUNT(board_no)
+		FROM
+			BOARD b
+		LEFT JOIN MEMBER AS m
+			ON b.member_no = m.member_no
+		<where><include refid="searchQuery" /></where> 
+	</select>
+
+	<select id="boardList" parameterType="HashMap" resultType="BoardVO">
+		SELECT
+			board_no, title, regist_date, member_no, member_name, hit
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, board_no, title, regist_date, member_no, member_name, hit
+			FROM 
+			(
+				SELECT 
+					board_no, title, regist_date, b.member_no, m.member_name, hit
+				FROM
+					BOARD AS b
+				LEFT JOIN MEMBER AS m
+					ON b.member_no = m.member_no
+				<where><include refid="searchQuery" /></where>
+				ORDER BY board_no DESC
+			) AS BOARD
+			, (Select @no:=0) AS no
+		) AS BOARD
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+
+	<select id="boardTopList" resultType="kr.co.ziziza.main.board.BoardVO">
+		SELECT 
+			board_no, title, regist_date
+		FROM 
+			BOARD
+		WHERE 
+			board_code = 'COMMUNITY' AND state = 'Y'
+		ORDER BY 
+			board_no DESC
+		LIMIT 5;
+	</select>
+
+	<insert id="boardInsert" parameterType="BoardVO">
+		INSERT INTO BOARD
+		 (board_code, title, contents, regist_date, state, member_no)
+		VALUES
+		 ('COMMUNITY', #{title}, #{contents}, NOW(), 'Y', #{member_no})
+			
+	</insert>
+	
+	<update id="updateHit" parameterType="Integer">
+		UPDATE BOARD
+		SET
+			hit = hit + 1
+		WHERE
+			board_no = #{boardNo}
+	</update>
+
+	<select id="boardetaild" parameterType="BoardVO" resultType="BoardVO">
+		SELECT
+			board_no, title, contents, m.member_no, m.member_name, regist_date
+		FROM
+			BOARD AS b
+		LEFT JOIN MEMBER AS m
+			ON b.member_no = m.member_no
+		WHERE 
+			board_no = #{board_no} AND b.state = 'Y'
+	</select>
+
+	<delete id="boardDelete" parameterType="BoardVO">
+		DELETE FROM BOARD WHERE board_no = #{board_no}
+	</delete>
+
+	<update id="boardupdate" parameterType="BoardVO">
+		UPDATE BOARD
+				set   title = #{title}
+					, contents = #{contents}
+					WHERE board_no = #{board_no}
+	</update>
+
+	<select id="boardreplylist" parameterType="BoardVO" resultType="ReplyVO">
+		SELECT r.comment_no, r.contents, r.regist_date, r.state
+		, r.board_no, m.member_no, m.member_name
+		FROM COMMENT r, MEMBER m
+		where board_no = #{board_no}
+			and r.member_no = m.member_no
+				ORDER BY r.comment_no
+	</select>
+
+	<insert id="insertReply" parameterType="ReplyVO">
+		INSERT INTO COMMENT 
+			(board_no, contents, regist_date, member_no, state)
+		VALUES
+			(#{board_no}, #{contents}, NOW(), #{member_no}, 'Y')
+		<selectKey resultType="Integer" keyProperty="comment_no" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+
+	<select id="ReplyDetail" parameterType="ReplyVO" resultType="ReplyVO">
+		SELECT r.comment_no, r.contents, r.regist_date, r.state
+		, r.board_no, m.member_no
+			FROM COMMENT r, MEMBER m
+				where r.comment_no = #{comment_no}
+				and r.member_no = m.member_no
+	</select>
+
+	<delete id="deleteBoardReply" parameterType="ReplyVO">
+		delete from COMMENT where comment_no = #{comment_no}
+	</delete>
+	
+	<!-- 검색 조건 쿼리 -->
+	<sql id="searchQuery">
+		board_code = 'COMMUNITY'
+		AND b.state = 'Y'
+		<if test="search.searchType != null and search.searchType != ''">
+			<choose>
+				<when test="search.searchType == 'TITLE'">
+					AND title like concat('%',#{search.searchTxt},'%')
+				</when>
+				<when test="search.searchType == 'CNT'">
+					AND contents like concat('%',#{search.searchTxt},'%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+
+</mapper>

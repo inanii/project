@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="QnaMngMapper">
+	<!-- 게시물 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(qna_no) AS totalItems
+		FROM
+			QNA AS q
+		WHERE
+			member_no = ${vo.memberNo}
+	</select>
+
+	<!-- 사업장 리스트 -->
+	<select id="selectQnaList" parameterType="HashMap" resultType="kr.co.ziziza.manager.qna.MngQnaVO" >
+		SELECT
+			qna_no as qnaNo, qst_title as qstTitle, qst_contents as qstContents, answer, regist_date as registDate, state
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, qna_no, qst_title, qst_contents, answer, regist_date, state
+			FROM 
+			(
+				SELECT 
+					qna_no, qst_title, qst_contents, answer, regist_date, q.state
+				FROM
+					QNA AS q
+				WHERE
+					member_no = ${vo.memberNo}
+				ORDER BY qna_no DESC
+			) AS QNA
+			, (Select @no:=0) AS no
+		) AS QNA
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+
+	<insert id="QnaInsert" parameterType="kr.co.ziziza.manager.qna.MngQnaVO">
+			INSERT INTO QNA 
+				(qst_title, qst_contents, alram_type, regist_date, state, member_no)
+			VALUES 
+				(#{qstTitle}, #{qstContents}, #{alarmType}, now(), 'N', #{memberNo})
+	</insert>
+	
+	<delete id="qnaDelete" parameterType="kr.co.ziziza.manager.qna.MngQnaVO">
+		DELETE FROM
+			QNA
+		WHERE
+			qna_No = #{qnaNo}
+	</delete>
+</mapper>

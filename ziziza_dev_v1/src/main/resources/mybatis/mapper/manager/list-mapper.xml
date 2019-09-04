@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="CompanyListMngMapper">
+	
+	<!-- 게시물 전체 수 -->
+	<select id="selectTotalCnt" parameterType="HashMap" resultType="Integer">
+		SELECT
+			COUNT(company_no) AS totalItems
+		FROM
+			COMPANY AS c
+		WHERE
+			mng_no = ${vo.mngNo}
+	</select>
+
+	<!-- 사업장 리스트 -->
+	<select id="selectCompanyList" parameterType="HashMap" resultType="kr.co.ziziza.manager.company.MngRegistVO" >
+		SELECT
+			company_no AS companyNo, company_name AS companyName, regist_date AS registDate, state
+		FROM 
+		(
+			SELECT 
+				@no:=@no+1 as rn, company_no, company_name, regist_date, state
+			FROM 
+			(
+				SELECT 
+					company_no, company_name, regist_date, c.state
+				FROM
+					COMPANY AS c
+				WHERE
+					mng_no = ${vo.mngNo}
+				ORDER BY company_no DESC
+			) AS COMPANY
+			, (Select @no:=0) AS no
+		) AS COMPANY
+		WHERE 
+			rn between #{page.startIndex} AND #{page.endIndex}
+	</select>
+	
+	<select id="selectDetail" parameterType="kr.co.ziziza.manager.company.MngRegistVO" resultType="kr.co.ziziza.manager.company.MngRegistVO" >
+		SELECT 
+			company_no AS companyNo, company_kind AS companyKind, company_name AS companyName, zone_code AS zoneCode, address, detail_address AS detailAddress, company_tel AS companyTel, contents, open_time AS openTime, close_time AS closeTime
+		FROM 
+			COMPANY
+		WHERE 
+			company_no = ${companyNo}
+	</select>
+	
+	<select id="selectDetailCharge" parameterType="MngRegistVO" resultType="MngChargeVO" >
+		SELECT 
+			charge_no AS chargeNo, company_no AS companyNo, time_kind AS timeKind, subject, price, order_seq AS orderSeq
+		FROM 
+			CHARGE
+		WHERE 
+			company_no = ${companyNo}
+		ORDER BY
+			order_seq
+	</select>
+	
+	<select id="selectDetailPlants" parameterType="MngRegistVO" resultType="MngPlantsVO" >
+		SELECT 
+			plant_no AS plantNo, company_no AS companyNo, plant_name AS plantName
+		FROM
+			PLANTS
+		WHERE 
+			company_no = ${companyNo}	
+	</select>
+
+	<insert id="companyInsert" parameterType="kr.co.ziziza.manager.company.MngRegistVO">
+		INSERT INTO COMPANY 
+			(company_name, company_kind, company_tel, open_time, close_time, zone_code, address, detail_address, contents, regist_date, state, mng_no)
+		VALUES 
+			(#{companyName}, #{companyKind}, #{companyTel}, #{openTime}, #{closeTime}, #{zoneCode}, #{address}, #{detailAddress}, #{contents}, now(), 'N', #{mngNo})
+		<selectKey resultType="Integer" keyProperty="companyNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>	
+	</insert>
+	
+	<insert id="companyCharge" parameterType="MngRegistVO">
+		INSERT INTO CHARGE
+			(company_no, time_kind, subject, price, order_seq)
+		VALUES 
+		<foreach collection="chargeList" item="vo" separator=",">
+			(#{companyNo}, #{vo.timeKind}, #{vo.subject}, #{vo.price}, #{vo.orderSeq})
+		</foreach>
+	</insert>
+	
+	<insert id="companyPlant" parameterType="MngRegistVO">
+		INSERT INTO PLANTS
+			(company_no, plant_name)
+		VALUES 
+		<foreach collection="plantList" item="vo" separator=",">
+			(#{companyNo}, #{vo.plantName})
+		</foreach>
+	</insert>
+	
+	<delete id="companyDelete" parameterType="kr.co.ziziza.manager.company.MngRegistVO">
+		DELETE FROM
+			COMPANY
+		WHERE
+			company_no = #{companyNo}
+	</delete>
+	
+	
+	<delete id="plantsDelete" parameterType="kr.co.ziziza.manager.company.MngRegistVO">
+		DELETE FROM
+			PLANTS
+		WHERE
+			company_no = #{companyNo}
+	</delete>
+	
+	<update id="companyUpdate" parameterType="kr.co.ziziza.manager.company.MngRegistVO">
+		UPDATE COMPANY
+		SET
+			company_name = #{companyName}, company_kind = #{companyKind}, company_tel = #{companyTel}, open_time = #{openTime}, close_time = #{closeTime},
+			zone_code = #{zoneCode}, address = #{address}, detail_address = #{detailAddress}, contents = #{contents}
+		WHERE
+			company_no = #{companyNo}
+	</update>
+	
+	<insert id="chargeInsert" parameterType="MngChargeVO">
+		INSERT INTO CHARGE
+			(company_no, time_kind, subject, price, order_seq)
+		VALUES 
+			(#{companyNo}, #{timeKind}, #{subject}, #{price}, #{orderSeq})
+		<selectKey resultType="Integer" keyProperty="chargeNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>	
+	</insert>
+	
+	<update id="chargeUpdate" parameterType="MngChargeVO">
+		UPDATE CHARGE
+		SET
+			 time_kind = #{timeKind}, subject = #{subject}, price = #{price}, order_seq = #{orderSeq}
+		WHERE
+			charge_no = #{chargeNo}
+	</update>
+	
+	<delete id="chargeDelete" parameterType="MngChargeVO">
+		DELETE FROM
+			CHARGE
+		WHERE
+			charge_no = #{chargeNo}
+	</delete>
+	
+	<insert id="plantInsert" parameterType="MngPlantsVO">
+		INSERT INTO PLANTS
+			(company_no, plant_name)
+		VALUES 
+			(#{companyNo}, #{plantName})
+		<selectKey resultType="Integer" keyProperty="plantNo" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>	
+	</insert>
+	
+	<update id="plantUpdate" parameterType="MngPlantsVO">
+		UPDATE PLANTS
+		SET
+			plant_name = #{plantName}
+		WHERE
+			plant_no = #{plantNo}
+	</update>
+	
+	<delete id="plantDelete" parameterType="MngPlantsVO">
+		DELETE FROM
+			PLANTS
+		WHERE
+			plant_no = #{plantNo}
+	</delete>
+</mapper>
